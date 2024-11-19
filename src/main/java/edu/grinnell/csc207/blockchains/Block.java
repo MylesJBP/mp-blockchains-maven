@@ -1,5 +1,7 @@
 package edu.grinnell.csc207.blockchains;
 
+import java.security.MessageDigest;
+
 /**
  * Blocks to be stored in blockchains.
  *
@@ -11,6 +13,13 @@ public class Block {
   // | Fields |
   // +--------+
 
+    int num;
+
+    Hash prevHash;
+
+    Transaction transaction;
+
+    long nonce;
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -31,7 +40,20 @@ public class Block {
    */
   public Block(int num, Transaction transaction, Hash prevHash,
       HashValidator check) {
-    // STUB
+      this.num = num;
+      this.prevHash = prevHash;
+      this.transaction = transaction;
+      
+      try {
+      MessageDigest md = MessageDigest.getInstance("sha-256");
+      while(true) {
+        md.update(String.valueOf(num).getBytes());
+        md.update(transaction.toString().getBytes());
+        md.update(prevHash.getBytes());
+      }
+      } catch (Exception e) {
+
+      }
   } // Block(int, Transaction, Hash, HashValidator)
 
   /**

@@ -1,16 +1,21 @@
 package edu.grinnell.csc207.blockchains;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 /**
  * Encapsulated hashes.
  *
- * @author Your Name Here
+ * @author Myles Bohrer-Purnell
+ * @author Anthony Castleberry
  * @author Samuel A. Rebelsky
  */
 public class Hash {
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
+  byte[] dataBytes;
 
+  int size;
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -22,7 +27,8 @@ public class Hash {
    *   The data to copy into the hash.
    */
   public Hash(byte[] data) {
-    // STUB
+      this.dataBytes = data;
+      this.size = data.length;
   } // Hash(byte[])
 
   // +---------+-----------------------------------------------------
@@ -35,7 +41,7 @@ public class Hash {
    * @return the number of bytes in the hash.
    */
   public int length() {
-    return 0;   // STUB
+    return this.size;
   } // length()
 
   /**
@@ -48,7 +54,7 @@ public class Hash {
    * @return the ith byte
    */
   public byte get(int i) {
-    return 0;   // STUB
+    return dataBytes[i];
   } // get()
 
   /**
@@ -58,7 +64,7 @@ public class Hash {
    * @return a copy of the bytes in the hash.
    */
   public byte[] getBytes() {
-    return new byte[] {1, 2, 3, 4, 5};      // STUB
+    return dataBytes.clone();
   } // getBytes()
 
   /**
@@ -67,7 +73,13 @@ public class Hash {
    * @return the hash as a hex string.
    */
   public String toString() {
-    return "";          // STUB
+    StringBuilder str = new StringBuilder(size * 2);
+
+    for (int i = 0; i < size; i++) {
+      str.append(String.format("%02X", Byte.toUnsignedInt(this.dataBytes[i])));
+    }
+
+    return str.toString();
   } // toString()
 
   /**
@@ -80,9 +92,13 @@ public class Hash {
    *   otherwise.
    */
   public boolean equals(Object other) {
-    return false;       // STUB
+    return (other instanceof Hash && this.equals((Hash) other));
   } // equals(Object)
 
+
+  public boolean equals(Hash other) {
+      return Arrays.equals(this.dataBytes, other.dataBytes);
+  } // equals(Object)
   /**
    * Get the hash code of this object.
    *

@@ -6,6 +6,9 @@ package edu.grinnell.csc207.blockchains;
  * @author Samuel A. Rebelsky
  */
 public interface HashValidator {
+
+  
+
   /**
    * Determine if a hash meets some criterion.
    *
@@ -15,5 +18,8 @@ public interface HashValidator {
    * @return true if the hash is valid and false otehrwise.
    */
   boolean isValid(Hash hash);
+
+  HashValidator simpleValidator = 
+  (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
 
 } // interface HashValidator
