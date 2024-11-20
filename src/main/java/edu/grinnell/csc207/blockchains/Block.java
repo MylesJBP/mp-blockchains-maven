@@ -1,5 +1,6 @@
 package edu.grinnell.csc207.blockchains;
 
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 /**
@@ -17,9 +18,12 @@ public class Block {
 
     Hash prevHash;
 
+    Hash currentHash;
+
     Transaction transaction;
 
     long nonce;
+
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -44,16 +48,7 @@ public class Block {
       this.prevHash = prevHash;
       this.transaction = transaction;
       
-      try {
-      MessageDigest md = MessageDigest.getInstance("sha-256");
-      while(true) {
-        md.update(String.valueOf(num).getBytes());
-        md.update(transaction.toString().getBytes());
-        md.update(prevHash.getBytes());
-      }
-      } catch (Exception e) {
-
-      }
+      Hash validHash = new Hash(new byte[] {1, 2, 3});
   } // Block(int, Transaction, Hash, HashValidator)
 
   /**
@@ -81,7 +76,11 @@ public class Block {
    * stored in the block.
    */
   static void computeHash() {
-    // STUB
+    try {
+      MessageDigest md = MessageDigest.getInstance("sha-256");
+    } catch (Exception e) {
+
+    } // try/catch
   } // computeHash()
 
   // +---------+-----------------------------------------------------
@@ -94,7 +93,7 @@ public class Block {
    * @return the number of the block.
    */
   public int getNum() {
-    return 0;   // STUB
+    return this.num;
   } // getNum()
 
   /**
@@ -103,7 +102,7 @@ public class Block {
    * @return the transaction.
    */
   public Transaction getTransaction() {
-    return new Transaction("Here", "There", 0); // STUB
+    return new Transaction(transaction.getSource(), transaction.getTarget(), transaction.getAmount()); // STUB
   } // getTransaction()
 
   /**
@@ -112,7 +111,7 @@ public class Block {
    * @return the nonce.
    */
   public long getNonce() {
-    return 0;   // STUB
+    return this.nonce;   // STUB
   } // getNonce()
 
   /**
@@ -121,7 +120,7 @@ public class Block {
    * @return the hash of the previous block.
    */
   Hash getPrevHash() {
-    return new Hash(new byte[] {0});  // STUB
+    return new Hash(this.prevHash.getBytes());  // STUB
   } // getPrevHash
 
   /**
@@ -130,7 +129,7 @@ public class Block {
    * @return the hash of the current block.
    */
   Hash getHash() {
-    return new Hash(new byte[] {0});  // STUB
+    return new Hash(currentHash.getBytes());  // STUB
   } // getHash
 
   /**
