@@ -20,6 +20,8 @@ public class Block {
 
     Hash currentHash;
 
+    Hash fullHash;
+
     Transaction transaction;
 
     long nonce;
@@ -77,10 +79,24 @@ public class Block {
           md.update(lbytes);
           currentHash = new Hash(md.digest());
           if (check.isValid(currentHash)) {
+            this.nonce = i;
             break;
           } 
           md.reset();
         }
+
+        /*compute the full hash for the block with everything before plus the new validated hash */
+        md.update(ibytes);
+        md.update(sourcebytes);
+        md.update(targetbytes);
+        md.update(amtbytes);
+        if (this.num != 0) {
+          md.update(prevbytes);
+        }
+        byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
+        md.update(lbytes);
+        md.update(currentHash.getBytes());
+        fullHash = new Hash(md.digest());
       } catch (Exception e) {}
 
   } // Block(int, Transaction, Hash, HashValidator)
@@ -122,6 +138,18 @@ public class Block {
     }
     md.update(noncebytes);
     currentHash = new Hash(md.digest());
+
+    /*compute the full hash for the block with everything before plus the new validated hash */
+    md.update(ibytes);
+    md.update(sourcebytes);
+    md.update(targetbytes);
+    md.update(amtbytes);
+    if (this.num != 0) {
+      md.update(prevbytes);
+    }
+    md.update(noncebytes);
+    md.update(currentHash.getBytes());
+    fullHash = new Hash(md.digest());
     } catch (Exception e) {}
 
   } // Block(int, Transaction, Hash, long)
