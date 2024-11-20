@@ -23,7 +23,6 @@ public class Block {
     Transaction transaction;
 
     long nonce;
-
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -48,7 +47,33 @@ public class Block {
       this.prevHash = prevHash;
       this.transaction = transaction;
       
-      Hash validHash = new Hash(new byte[] {1, 2, 3});
+      try {
+        MessageDigest md = MessageDigest.getInstance("sha-256");
+        byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+        byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.transaction.getAmount()).array();
+        byte[] sourcebytes = this.transaction.getSource().getBytes();
+        byte[] targetbytes = this.transaction.getTarget().getBytes();
+        byte[] prevbytes = this.prevHash.getBytes();
+
+        for (long i = 0; i < Long.MAX_VALUE; i++) {
+          md.update(ibytes);
+          md.update(sourcebytes);
+          md.update(targetbytes);
+          md.update(amtbytes);
+          if (this.num != 0) {
+            md.update(prevbytes);
+          }
+
+          byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(i).array();
+          md.update(lbytes);
+          currentHash = new Hash(md.digest());
+          if (check.isValid(currentHash)) {
+            break;
+          } 
+          md.reset();
+        }
+      } catch (Exception e) {}
+
   } // Block(int, Transaction, Hash, HashValidator)
 
   /**
@@ -64,7 +89,32 @@ public class Block {
    *   The nonce of the block.
    */
   public Block(int num, Transaction transaction, Hash prevHash, long nonce) {
-    // STUB
+    this.num = num;
+    this.transaction = transaction;
+    this.prevHash = prevHash;
+    this.nonce = nonce;
+
+    try {
+    MessageDigest md = MessageDigest.getInstance("sha-256");
+    
+    byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+    byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.transaction.getAmount()).array();
+    byte[] sourcebytes = this.transaction.getSource().getBytes();
+    byte[] targetbytes = this.transaction.getTarget().getBytes();
+    byte[] prevbytes = this.prevHash.getBytes();
+    byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
+
+    md.update(ibytes);
+    md.update(sourcebytes);
+    md.update(targetbytes);
+    md.update(amtbytes);
+    if (this.num != 0) {
+      md.update(prevbytes);
+    }
+    md.update(noncebytes);
+    currentHash = new Hash(md.digest());
+    } catch (Exception e) {}
+
   } // Block(int, Transaction, Hash, long)
 
   // +---------+-----------------------------------------------------
@@ -76,11 +126,7 @@ public class Block {
    * stored in the block.
    */
   static void computeHash() {
-    try {
-      MessageDigest md = MessageDigest.getInstance("sha-256");
-    } catch (Exception e) {
-
-    } // try/catch
+    // STUB
   } // computeHash()
 
   // +---------+-----------------------------------------------------
@@ -111,7 +157,7 @@ public class Block {
    * @return the nonce.
    */
   public long getNonce() {
-    return this.nonce;   // STUB
+    return this.nonce;
   } // getNonce()
 
   /**
@@ -120,7 +166,7 @@ public class Block {
    * @return the hash of the previous block.
    */
   Hash getPrevHash() {
-    return new Hash(this.prevHash.getBytes());  // STUB
+    return prevHash;
   } // getPrevHash
 
   /**
@@ -129,7 +175,7 @@ public class Block {
    * @return the hash of the current block.
    */
   Hash getHash() {
-    return new Hash(currentHash.getBytes());  // STUB
+    return currentHash;
   } // getHash
 
   /**
