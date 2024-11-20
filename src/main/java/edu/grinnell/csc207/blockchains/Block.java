@@ -43,18 +43,27 @@ public class Block {
    */
   public Block(int num, Transaction transaction, Hash prevHash,
       HashValidator check) {
+      /*set the fields we can */
       this.num = num;
       this.prevHash = prevHash;
       this.transaction = transaction;
       
       try {
         MessageDigest md = MessageDigest.getInstance("sha-256");
+        /* 
+         * turn the fields into byte arrays so they can be updated into the message digest.
+         * we make individual byte arrays for each field in transaction. 
+        */
         byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
         byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.transaction.getAmount()).array();
         byte[] sourcebytes = this.transaction.getSource().getBytes();
         byte[] targetbytes = this.transaction.getTarget().getBytes();
         byte[] prevbytes = this.prevHash.getBytes();
 
+        /*
+         * updates all the fields we already have, updates the potential nonce long i, then checks
+         * the resulting hash for validity, trying the next long if not.
+        */
         for (long i = 0; i < Long.MAX_VALUE; i++) {
           md.update(ibytes);
           md.update(sourcebytes);
