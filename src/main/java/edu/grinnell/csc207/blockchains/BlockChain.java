@@ -13,9 +13,9 @@ public class BlockChain implements Iterable<Transaction> {
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
-    Block firstBlock;
+    Node firstBlock;
 
-    Block tailBlock;
+    Node tailBlock;
 
     int size;
   // +--------------+------------------------------------------------
@@ -30,7 +30,7 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public BlockChain(HashValidator check) {
     this.size = 0;
-    this.firstBlock = new Block(0, new Transaction(null, null, 0), new Hash(new byte[] {}), check);
+    this.firstBlock = new Node (new Block(0, new Transaction(null, null, 0), new Hash(new byte[] {}), check));
     this.tailBlock = this.firstBlock;
   } // BlockChain(HashValidator)
 
@@ -75,8 +75,10 @@ public class BlockChain implements Iterable<Transaction> {
    *   hash is incorrect.
    */
   public void append(Block blk) {
-    blk.prevHash = this.tailBlock.getHash();
-    this.tailBlock = blk;
+    blk.prevHash = this.tailBlock.getBlock().getHash();
+    Node newNode = new Node(blk);
+    this.tailBlock.add(newNode);
+    this.tailBlock = newNode;
   } // append()
 
   /**
@@ -87,10 +89,18 @@ public class BlockChain implements Iterable<Transaction> {
    *   is removed).
    */
   public boolean removeLast() {
-    if (this.tailBlock.equals(this.firstBlock)) {
+    if (this.tailBlock.getBlock().equals(this.firstBlock.getBlock())) {
       return false;
     } else {
-      // remove last block.
+      Node prevNode = this.firstBlock;
+      Node node = this.firstBlock.getNext();
+      while(node.hasNext()) {
+        prevNode = node;
+        node = node.getNext();
+      }
+      prevNode.removeNext();
+      this.tailBlock = prevNode;
+      return true;
     } // if/else
   } // removeLast()
 
@@ -100,7 +110,7 @@ public class BlockChain implements Iterable<Transaction> {
    * @return the hash of the last sblock in the chain.
    */
   public Hash getHash() {
-    return new Hash(new byte[] {2, 0, 7});   // STUB
+    return this.tailBlock.getBlock().getHash();
   } // getHash()
 
   /**
@@ -136,12 +146,16 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public Iterator<String> users() {
     return new Iterator<String>() {
+      Node nextNode = BlockChain.this.firstBlock;
+      Node tailNode = BlockChain.this.tailBlock;
       public boolean hasNext() {
-        return false;   // STUB
+        return !(nextNode.equals(tailNode));
       } // hasNext()
-
+      
       public String next() {
-        throw new NoSuchElementException();     // STUB
+        String trgt = nextNode.getBlock().getTransaction().getTarget();
+        nextNode = nextNode.getNext();
+        return trgt;
       } // next()
     };
   } // users()
@@ -155,7 +169,18 @@ public class BlockChain implements Iterable<Transaction> {
    * @return that user's balance (or 0, if the user is not in the system).
    */
   public int balance(String user) {
-    return 0;   // STUB
+    Node currentNode = this.firstBlock;
+    int balance = 0;
+    while(currentNode.hasNext()) {
+      if(currentNode.getBlock().getTransaction().getSource().equals(user)) {
+        balance -= currentNode.getBlock().getTransaction().getAmount();
+      } 
+
+      if(currentNode.getBlock().getTransaction().getTarget().equals(user)) {
+        balance += currentNode.getBlock().getTransaction().getAmount();
+      }
+    }
+    return balance;
   } // balance()
 
   /**

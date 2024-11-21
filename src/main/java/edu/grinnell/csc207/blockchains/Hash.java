@@ -1,6 +1,4 @@
 package edu.grinnell.csc207.blockchains;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 /**
  * Encapsulated hashes.
