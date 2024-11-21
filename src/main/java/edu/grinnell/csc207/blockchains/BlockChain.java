@@ -6,13 +6,18 @@ import java.util.NoSuchElementException;
 /**
  * A full blockchain.
  *
- * @author Your Name Here
+ * @author Myles Bohrer-Purnell
+ * @author Anthony Castleberry
  */
 public class BlockChain implements Iterable<Transaction> {
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
+    Block firstBlock;
 
+    Block tailBlock;
+
+    int size;
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -24,7 +29,9 @@ public class BlockChain implements Iterable<Transaction> {
    *   The validator used to check elements.
    */
   public BlockChain(HashValidator check) {
-    // STUB
+    this.size = 0;
+    this.firstBlock = new Block(0, new Transaction(null, null, 0), new Hash(new byte[] {}), check);
+    this.tailBlock = this.firstBlock;
   } // BlockChain(HashValidator)
 
   // +---------+-----------------------------------------------------
@@ -45,7 +52,7 @@ public class BlockChain implements Iterable<Transaction> {
    * @return a new block with correct number, hashes, and such.
    */
   public Block mine(Transaction t) {
-    return new Block(10, t, new Hash(new byte[] {7}), 11);       // STUB
+    return new Block(this.size, t, new Hash(new byte[] {7}), 11);       // STUB
   } // mine(Transaction)
 
   /**
@@ -54,7 +61,7 @@ public class BlockChain implements Iterable<Transaction> {
    * @return the number of blocks in the chain, including the initial block.
    */
   public int getSize() {
-    return 2;   // STUB
+    return this.size;
   } // getSize()
 
   /**
@@ -68,7 +75,8 @@ public class BlockChain implements Iterable<Transaction> {
    *   hash is incorrect.
    */
   public void append(Block blk) {
-    // STUB
+    blk.prevHash = this.tailBlock.getHash();
+    this.tailBlock = blk;
   } // append()
 
   /**
@@ -79,7 +87,11 @@ public class BlockChain implements Iterable<Transaction> {
    *   is removed).
    */
   public boolean removeLast() {
-    return true;        // STUB
+    if (this.tailBlock.equals(this.firstBlock)) {
+      return false;
+    } else {
+      // remove last block.
+    } // if/else
   } // removeLast()
 
   /**
