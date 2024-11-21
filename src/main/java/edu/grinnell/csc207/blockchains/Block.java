@@ -162,8 +162,8 @@ public class Block {
    * Compute the hash of the block given all the other info already
    * stored in the block.
    */
-  static void computeHash() {
-    // STUB
+  public void computeHash() {
+
   } // computeHash()
 
   // +---------+-----------------------------------------------------
