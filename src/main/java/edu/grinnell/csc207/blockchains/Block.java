@@ -6,7 +6,8 @@ import java.security.MessageDigest;
 /**
  * Blocks to be stored in blockchains.
  *
- * @author Your Name Here
+ * @author Anthony Castleberry
+ * @author Myles Bohrer-Purnell
  * @author Samuel A. Rebelsky
  */
 public class Block {
