@@ -13,11 +13,16 @@ public class BlockChain implements Iterable<Transaction> {
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
-    Node firstBlock;
 
-    Node tailBlock;
+  /** First block/node in the blockchain. */
+  Node firstBlock;
 
-    int size;
+  /** Last block/node in the blockchain. */
+  Node tailBlock;
+
+  /** The number of blocks in the blockchain. */
+  int size;
+
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -128,8 +133,8 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public boolean isCorrect() {
     Node newNode = this.firstBlock;
-    HashValidator simpleValidator = 
-    (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
+    HashValidator simpleValidator = (hash) -> (hash.length() >= 1)
+                                    && (hash.get(0) == 0);
 
     while (newNode != tailBlock.next) {
       if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
@@ -154,8 +159,8 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public void check() throws Exception {
     Node newNode = this.firstBlock;
-    HashValidator simpleValidator = 
-    (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
+    HashValidator simpleValidator = (hash) -> (hash.length() >= 1)
+                                    && (hash.get(0) == 0);
 
     while (newNode != tailBlock.next) {
       if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
@@ -181,7 +186,7 @@ public class BlockChain implements Iterable<Transaction> {
       public boolean hasNext() {
         return !(nextNode.equals(tailNode));
       } // hasNext()
-      
+
       public String next() {
         String trgt = nextNode.getBlock().getTransaction().getTarget();
         nextNode = nextNode.getNext();

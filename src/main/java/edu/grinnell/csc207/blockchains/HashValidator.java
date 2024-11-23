@@ -7,8 +7,6 @@ package edu.grinnell.csc207.blockchains;
  */
 public interface HashValidator {
 
-  
-
   /**
    * Determine if a hash meets some criterion.
    *
@@ -19,7 +17,7 @@ public interface HashValidator {
    */
   boolean isValid(Hash hash);
 
-  HashValidator simpleValidator = 
-  (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
+  HashValidator simpleValidator = (hash) -> (hash.length() >= 1)
+                                  && (hash.get(0) == 0);
 
 } // interface HashValidator
