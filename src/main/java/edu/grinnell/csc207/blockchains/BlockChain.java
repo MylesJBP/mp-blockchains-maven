@@ -122,7 +122,11 @@ public class BlockChain implements Iterable<Transaction> {
    * @return true if the blockchain is correct and false otherwise.
    */
   public boolean isCorrect() {
-    return true;        // STUB
+    Node newNode = this.firstBlock;
+    while (newNode.hasNext()) {
+
+    } // while
+    return true;
   } // isCorrect()
 
   /**
@@ -171,14 +175,13 @@ public class BlockChain implements Iterable<Transaction> {
   public int balance(String user) {
     Node currentNode = this.firstBlock;
     int balance = 0;
-    while(currentNode.hasNext()) {
-      if(currentNode.getBlock().getTransaction().getSource().equals(user)) {
+    while (currentNode.hasNext()) {
+      if (currentNode.getBlock().getTransaction().getSource().equals(user)) {
         balance -= currentNode.getBlock().getTransaction().getAmount();
-      } 
-
-      if(currentNode.getBlock().getTransaction().getTarget().equals(user)) {
+      } // if
+      if (currentNode.getBlock().getTransaction().getTarget().equals(user)) {
         balance += currentNode.getBlock().getTransaction().getAmount();
-      }
+      } // if
     }
     return balance;
   } // balance()
@@ -195,7 +198,7 @@ public class BlockChain implements Iterable<Transaction> {
       } // hasNext()
 
       public Block next() {
-        throw new NoSuchElementException();     // STUB
+        throw new NoSuchElementException();
       } // next()
     };
   } // blocks()
@@ -212,7 +215,7 @@ public class BlockChain implements Iterable<Transaction> {
       } // hasNext()
 
       public Transaction next() {
-        throw new NoSuchElementException();     // STUB
+        throw new NoSuchElementException();
       } // next()
     };
   } // iterator()
