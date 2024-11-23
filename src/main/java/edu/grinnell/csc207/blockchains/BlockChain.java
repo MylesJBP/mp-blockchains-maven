@@ -97,7 +97,7 @@ public class BlockChain implements Iterable<Transaction> {
       while(node.hasNext()) {
         prevNode = node;
         node = node.getNext();
-      }
+      } // while
       prevNode.removeNext();
       this.tailBlock = prevNode;
       return true;
@@ -123,8 +123,17 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public boolean isCorrect() {
     Node newNode = this.firstBlock;
-    while (newNode.hasNext()) {
+    HashValidator simpleValidator = 
+    (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
 
+    while (newNode != tailBlock.next) {
+      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
+        return false;
+      } else if (newNode.hasNext() && newNode.next.getBlock().getPrevHash() != newNode.getBlock().getHash()) {
+        return false;
+      } else if (!simpleValidator.isValid(newNode.getBlock().getHash())) {
+        return false;
+      } // if/else
     } // while
     return true;
   } // isCorrect()
@@ -139,7 +148,19 @@ public class BlockChain implements Iterable<Transaction> {
    *   If things are wrong at any block.
    */
   public void check() throws Exception {
-    // STUB
+    Node newNode = this.firstBlock;
+    HashValidator simpleValidator = 
+    (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
+
+    while (newNode != tailBlock.next) {
+      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
+        throw new Exception("Incorrect Amounts for User: " + newNode.getBlock().transaction.getSource());
+      } else if (newNode.hasNext() && newNode.next.getBlock().getPrevHash() != newNode.getBlock().getHash()) {
+        throw new Exception("Incorrect Previous Hash for Block: " + newNode.getBlock().getNum());
+      } else if (!simpleValidator.isValid(newNode.getBlock().getHash())) {
+        throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
+      } // if/else
+    } // while
   } // check()
 
   /**
@@ -182,7 +203,7 @@ public class BlockChain implements Iterable<Transaction> {
       if (currentNode.getBlock().getTransaction().getTarget().equals(user)) {
         balance += currentNode.getBlock().getTransaction().getAmount();
       } // if
-    }
+    } // while
     return balance;
   } // balance()
 
