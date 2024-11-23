@@ -52,7 +52,10 @@ public class BlockChain implements Iterable<Transaction> {
    * @return a new block with correct number, hashes, and such.
    */
   public Block mine(Transaction t) {
-    return new Block(this.size, t, new Hash(new byte[] {7}), 11);       // STUB
+    HashValidator simpleValidator = 
+    (hash) -> (hash.length() >= 1) && (hash.get(0) == 0);
+
+    return new Block(this.size, t, tailBlock.getBlock().getHash(), simpleValidator);
   } // mine(Transaction)
 
   /**
@@ -79,6 +82,7 @@ public class BlockChain implements Iterable<Transaction> {
     Node newNode = new Node(blk);
     this.tailBlock.add(newNode);
     this.tailBlock = newNode;
+    this.size++;
   } // append()
 
   /**
@@ -100,6 +104,7 @@ public class BlockChain implements Iterable<Transaction> {
       } // while
       prevNode.removeNext();
       this.tailBlock = prevNode;
+      this.size--;
       return true;
     } // if/else
   } // removeLast()
