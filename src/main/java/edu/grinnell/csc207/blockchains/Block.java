@@ -74,7 +74,7 @@ public class Block {
           md.update(amtbytes);
           if (this.num != 0) {
             md.update(prevbytes);
-          }
+          } // if
 
           byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(i).array();
           md.update(lbytes);
@@ -82,9 +82,9 @@ public class Block {
           if (check.isValid(currentHash)) {
             this.nonce = i;
             break;
-          } 
+          } // if
           md.reset();
-        }
+        } // for
 
         /*compute the full hash for the block with everything before plus the new validated hash */
         md.update(ibytes);
@@ -93,7 +93,7 @@ public class Block {
         md.update(amtbytes);
         if (this.num != 0) {
           md.update(prevbytes);
-        }
+        } // if
         byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
         md.update(lbytes);
         md.update(currentHash.getBytes());
@@ -222,6 +222,12 @@ public class Block {
    * @return a string representation of the block.
    */
   public String toString() {
-    return "";  // STUB
-  } // toString()
+    if (this.transaction.getSource().equals("")) {
+      return "Block " + this.num + " (Transaction: [Deposit, Target: " + this.transaction.getTarget() + ", Amount: " + this.transaction.getAmount()
+             + "], nonce: " + this.nonce + ", prevHash: " + this.prevHash + ", hash: " + this.currentHash;
+    } else {
+      return "Block " + this.num + " (Transaction: [Source: " + this.transaction.getSource() + ", Target: " + this.transaction.getTarget()
+      + ", Amount: " + this.transaction.getAmount() + "], nonce: " + this.nonce + ", prevHash: " + this.prevHash + ", hash: " + this.currentHash;
+    } // if/else
+   } // toString()
 } // class Block
