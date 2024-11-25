@@ -99,11 +99,12 @@ public class BlockChainUI {
 
       switch (command.toLowerCase()) {
         case "append":
-          pen.printf("Command '%s' is not yet implemented", command);
+          int nonce = 0;
+          chain.append(new Block(chain.getSize(), new Transaction(source, target, amount), chain.getHash(), nonce));
           break;
 
         case "balance":
-          pen.printf("Command '%s' is not yet implemented", command);
+          pen.printf(chain.balance(source));
           break;
 
         case "blocks":
@@ -111,7 +112,7 @@ public class BlockChainUI {
           break;
 
         case "check":
-          pen.printf("Command '%s' is not yet implemented", command);
+          pen.printf(chain.isCorrect());
           break;
 
         case "help":

@@ -132,17 +132,18 @@ public class BlockChain implements Iterable<Transaction> {
    */
   public boolean isCorrect() {
     Node newNode = this.firstBlock;
-    HashValidator simpleValidator = (hash) -> (hash.length() >= 1)
-                                    && (hash.get(0) == 0);
 
     while (newNode != tailBlock.next) {
-      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
+      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount() && !newNode.getBlock().transaction.getSource().equals("")) {
         return false;
       } else if (newNode.hasNext() && newNode.next.getBlock().getPrevHash() != newNode.getBlock().getHash()) {
         return false;
-      } else if (!simpleValidator.isValid(newNode.getBlock().getHash())) {
+      } else if (!this.check.isValid(newNode.getBlock().getHash())) {
+        return false;
+      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode))) {
         return false;
       } // if/else
+      newNode = newNode.next;
     } // while
     return true;
   } // isCorrect()
@@ -160,13 +161,16 @@ public class BlockChain implements Iterable<Transaction> {
     Node newNode = this.firstBlock;
 
     while (newNode != tailBlock.next) {
-      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount()) {
+      if (balance(newNode.getBlock().transaction.getSource()) < newNode.getBlock().transaction.getAmount() && !newNode.getBlock().transaction.getSource().equals("")) {
         throw new Exception("Incorrect Amounts for User: " + newNode.getBlock().transaction.getSource());
       } else if (newNode.hasNext() && newNode.next.getBlock().getPrevHash() != newNode.getBlock().getHash()) {
         throw new Exception("Incorrect Previous Hash for Block: " + newNode.getBlock().getNum());
       } else if (!this.check.isValid(newNode.getBlock().getHash())) {
         throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
-      } // if/else
+      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode))) {
+          throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
+      } // else/if
+      newNode = newNode.next;
     } // while
   } // check()
 

@@ -24,9 +24,6 @@ public class Block {
   /** The hash of the current block. */
   Hash currentHash;
 
-  /** The full hash of the block. */
-  Hash fullHash;
-
   /** transaction data of the block. */
   Transaction transaction;
 
@@ -173,7 +170,19 @@ public class Block {
    * stored in the block.
    */
   public void computeHash() {
+    try {
+      MessageDigest md = MessageDigest.getInstance("sha-256");
 
+      byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+      byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
+                        .putInt(this.transaction.getAmount()).array();
+      byte[] sourcebytes = this.transaction.getSource().getBytes();
+      byte[] targetbytes = this.transaction.getTarget().getBytes();
+      byte[] prevbytes = this.prevHash.getBytes();
+      byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
+    } catch (Exception e) {
+
+    } // try/catch
   } // computeHash()
 
   // +---------+-----------------------------------------------------
