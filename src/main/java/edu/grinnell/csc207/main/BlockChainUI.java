@@ -100,31 +100,17 @@ public class BlockChainUI {
 
       switch (command.toLowerCase()) {
         case "append":
-          String nonce;
-          int numNonce;
-          String strAmnt;
-          pen.print("\nSource (return for deposit): ");
-          pen.flush();
-          source = eyes.readLine();
-          pen.print("\nTarget: ");
-          pen.flush();
-          target = eyes.readLine();
-          pen.print("\nAmount: ");
-          pen.flush();
-          strAmnt = eyes.readLine();
-          pen.print("\nNonce: ");
-          pen.flush();
-          nonce = eyes.readLine();
+          int nonce;
+          source = IOUtils.readLine(pen, eyes, "Source (return for deposit): ");
+          target = IOUtils.readLine(pen, eyes, "Target: ");
+          amount = IOUtils.readInt(pen, eyes, "Amount: ");
+          nonce = IOUtils.readInt(pen, eyes, "Nonce: ");
 
-          amount = Integer.parseInt(strAmnt);
-          numNonce = Integer.parseInt(nonce);
-          chain.append(new Block(chain.getSize(), new Transaction(source, target, amount), chain.getHash(), numNonce));
+          chain.append(new Block(chain.getSize(), new Transaction(source, target, amount), chain.getHash(), nonce));
           break;
 
         case "balance":
-          pen.print("\nUser: ");
-          pen.flush();
-          source = eyes.readLine();
+          source = IOUtils.readLine(pen, eyes, "User: ");
           pen.printf(source + "'s balance is " + chain.balance(source));
           break;
 
@@ -160,7 +146,11 @@ public class BlockChainUI {
           break;
 
         case "remove":
-          chain.removeLast();
+          if (chain.removeLast()) {
+            pen.println("Removed last element");
+          } else {
+            pen.println("Could not remove last element");
+          } // if/else
           break;
 
         case "transactions":

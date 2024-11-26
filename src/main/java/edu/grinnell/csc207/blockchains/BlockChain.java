@@ -1,5 +1,7 @@
 package edu.grinnell.csc207.blockchains;
 
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -44,6 +46,45 @@ public class BlockChain implements Iterable<Transaction> {
   // +---------+-----------------------------------------------------
   // | Helpers |
   // +---------+
+
+  public Hash computeHash(Block blk) {
+    Hash resultHash = new Hash(new byte[] {1});
+    try {
+      MessageDigest md = MessageDigest.getInstance("sha-256");
+      byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(blk.getNum()).array();
+      byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
+                        .putInt(blk.getTransaction().getAmount()).array();
+      byte[] sourcebytes = blk.getTransaction().getSource().getBytes();
+      byte[] targetbytes = blk.getTransaction().getTarget().getBytes();
+      byte[] prevbytes = blk.prevHash.getBytes();
+      byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(blk.getNonce()).array();
+
+      md.update(ibytes);
+      md.update(sourcebytes);
+      md.update(targetbytes);
+      md.update(amtbytes);
+      if (blk.getNum() != 0) {
+        md.update(prevbytes);
+      } // if
+      md.update(noncebytes);
+      resultHash = new Hash(md.digest());
+
+      /*compute the full hash for the block with everything before plus the new validated hash */
+      md.update(ibytes);
+      md.update(sourcebytes);
+      md.update(targetbytes);
+      md.update(amtbytes);
+      if (blk.getNum() != 0) {
+        md.update(prevbytes);
+      } // if
+      md.update(noncebytes);
+      md.update(resultHash.getBytes());
+      // resultHash = new Hash(md.digest());
+    } catch (Exception e) {
+      // catch exception in hash finding process
+    } // try/catch
+    return resultHash;
+  } // computeHash(Block blk)
 
   // +---------+-----------------------------------------------------
   // | Methods |
@@ -140,7 +181,7 @@ public class BlockChain implements Iterable<Transaction> {
         return false;
       } else if (!this.check.isValid(newNode.getBlock().getHash())) {
         return false;
-      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode))) {
+      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode.getBlock()))) {
         return false;
       } // if/else
       newNode = newNode.next;
@@ -167,7 +208,7 @@ public class BlockChain implements Iterable<Transaction> {
         throw new Exception("Incorrect Previous Hash for Block: " + newNode.getBlock().getNum());
       } else if (!this.check.isValid(newNode.getBlock().getHash())) {
         throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
-      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode))) {
+      } else if (!newNode.getBlock().getHash().equals(computeHash(newNode.getBlock()))) {
           throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
       } // else/if
       newNode = newNode.next;
@@ -183,9 +224,8 @@ public class BlockChain implements Iterable<Transaction> {
   public Iterator<String> users() {
     return new Iterator<String>() {
       Node nextNode = BlockChain.this.firstBlock;
-      Node tailNode = BlockChain.this.tailBlock;
       public boolean hasNext() {
-        return !(nextNode.equals(tailNode));
+        return !(nextNode.equals(BlockChain.this.tailBlock));
       } // hasNext()
 
       public String next() {
@@ -230,7 +270,7 @@ public class BlockChain implements Iterable<Transaction> {
       Node nextBlock = BlockChain.this.firstBlock;
 
       public boolean hasNext() {
-        return !(nextBlock == null);
+        return !(nextBlock.equals(BlockChain.this.tailBlock));
       } // hasNext()
 
       public Block next() {

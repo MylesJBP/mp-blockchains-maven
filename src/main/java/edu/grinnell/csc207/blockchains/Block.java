@@ -100,7 +100,7 @@ public class Block {
       byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
       md.update(lbytes);
       md.update(currentHash.getBytes());
-      fullHash = new Hash(md.digest());
+      // this.currentHash = new Hash(md.digest());
     } catch (Exception e) {
       // catch for error in hash gathering process
     } // try/catch
@@ -154,7 +154,7 @@ public class Block {
       } // if
       md.update(noncebytes);
       md.update(currentHash.getBytes());
-      fullHash = new Hash(md.digest());
+      // this.currentHash = new Hash(md.digest());
     } catch (Exception e) {
       // catch exception in hash finding process
     } // try/catch
@@ -169,20 +169,95 @@ public class Block {
    * Compute the hash of the block given all the other info already
    * stored in the block.
    */
-  public void computeHash() {
-    try {
-      MessageDigest md = MessageDigest.getInstance("sha-256");
-
-      byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
-      byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
-                        .putInt(this.transaction.getAmount()).array();
-      byte[] sourcebytes = this.transaction.getSource().getBytes();
-      byte[] targetbytes = this.transaction.getTarget().getBytes();
-      byte[] prevbytes = this.prevHash.getBytes();
-      byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
-    } catch (Exception e) {
-
-    } // try/catch
+  public void computeHash(boolean needNonce, HashValidator check) {
+    if (needNonce) {
+      try {
+        MessageDigest md = MessageDigest.getInstance("sha-256");
+        /*
+          * turn the fields into byte arrays so they can be updated into the message digest.
+          * we make individual byte arrays for each field in transaction.
+        */
+        byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+        byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
+                          .putInt(this.transaction.getAmount()).array();
+        byte[] sourcebytes = this.transaction.getSource().getBytes();
+        byte[] targetbytes = this.transaction.getTarget().getBytes();
+        byte[] prevbytes = this.prevHash.getBytes();
+  
+        /*
+          * updates all the fields we already have, updates the potential nonce long i, then checks
+          * the resulting hash for validity, trying the next long if not.
+        */
+        for (long i = 0; i < Long.MAX_VALUE; i++) {
+          md.update(ibytes);
+          md.update(sourcebytes);
+          md.update(targetbytes);
+          md.update(amtbytes);
+          if (this.num != 0) {
+            md.update(prevbytes);
+          } // if
+  
+          byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(i).array();
+          md.update(lbytes);
+          currentHash = new Hash(md.digest());
+          if (check.isValid(currentHash)) {
+            this.nonce = i;
+            break;
+          } // if
+          md.reset();
+        } // for
+  
+        /*compute the full hash for the block with everything before plus the new validated hash */
+        md.update(ibytes);
+        md.update(sourcebytes);
+        md.update(targetbytes);
+        md.update(amtbytes);
+        if (this.num != 0) {
+          md.update(prevbytes);
+        } // if
+        byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
+        md.update(lbytes);
+        md.update(currentHash.getBytes());
+        // this.currentHash = new Hash(md.digest());
+      } catch (Exception e) {
+        // catch for error in hash gathering process
+      } // try/catch
+    } else {
+      try {
+        MessageDigest md = MessageDigest.getInstance("sha-256");
+        byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+        byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
+                          .putInt(this.transaction.getAmount()).array();
+        byte[] sourcebytes = this.transaction.getSource().getBytes();
+        byte[] targetbytes = this.transaction.getTarget().getBytes();
+        byte[] prevbytes = this.prevHash.getBytes();
+        byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
+  
+        md.update(ibytes);
+        md.update(sourcebytes);
+        md.update(targetbytes);
+        md.update(amtbytes);
+        if (this.num != 0) {
+          md.update(prevbytes);
+        } // if
+        md.update(noncebytes);
+        currentHash = new Hash(md.digest());
+  
+        /*compute the full hash for the block with everything before plus the new validated hash */
+        md.update(ibytes);
+        md.update(sourcebytes);
+        md.update(targetbytes);
+        md.update(amtbytes);
+        if (this.num != 0) {
+          md.update(prevbytes);
+        } // if
+        md.update(noncebytes);
+        md.update(currentHash.getBytes());
+        // this.currentHash = new Hash(md.digest());
+      } catch (Exception e) {
+        // catch exception in hash finding process
+      } // try/catch
+    } // if/else
   } // computeHash()
 
   // +---------+-----------------------------------------------------
