@@ -11,8 +11,10 @@ public class Hash {
   // +--------+------------------------------------------------------
   // | Fields |
   // +--------+
+  /** The set of bytes to be turned into a hash. */
   byte[] dataBytes;
 
+  /** The length of the hash. */
   int size;
   // +--------------+------------------------------------------------
   // | Constructors |
@@ -25,8 +27,8 @@ public class Hash {
    *   The data to copy into the hash.
    */
   public Hash(byte[] data) {
-      this.dataBytes = data.clone();
-      this.size = data.length;
+    this.dataBytes = data.clone();
+    this.size = data.length;
   } // Hash(byte[])
 
   // +---------+-----------------------------------------------------
@@ -72,11 +74,9 @@ public class Hash {
    */
   public String toString() {
     StringBuilder str = new StringBuilder(size * 2);
-
     for (int i = 0; i < size; i++) {
       str.append(String.format("%02X", Byte.toUnsignedInt(this.dataBytes[i])));
-    }
-
+    } // for
     return str.toString();
   } // toString()
 
@@ -93,9 +93,13 @@ public class Hash {
     return (other instanceof Hash && this.equals((Hash) other));
   } // equals(Object)
 
-
+  /**
+   * Checks if two hashes are equal.
+   * @param other the hash to compare to current hash
+   * @return true if they are equal and false if they are not
+   */
   public boolean equals(Hash other) {
-      return Arrays.equals(this.dataBytes, other.dataBytes);
+    return Arrays.equals(this.dataBytes, other.dataBytes);
   } // equals(Object)
   /**
    * Get the hash code of this object.

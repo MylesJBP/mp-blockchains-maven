@@ -3,7 +3,6 @@ package edu.grinnell.csc207.blockchains;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * A full blockchain.
@@ -25,6 +24,7 @@ public class BlockChain implements Iterable<Transaction> {
   /** The number of blocks in the blockchain. */
   int size;
 
+  /** checker for the hashes of the blocks in the chain. */
   HashValidator check;
   // +--------------+------------------------------------------------
   // | Constructors |
@@ -33,20 +33,27 @@ public class BlockChain implements Iterable<Transaction> {
   /**
    * Create a new blockchain using a validator to check elements.
    *
-   * @param check
+   * @param iCheck
    *   The validator used to check elements.
    */
-  public BlockChain(HashValidator check) {
+  public BlockChain(HashValidator iCheck) {
     this.size = 1;
-    this.firstBlock = new Node (new Block(0, new Transaction("", "", 0), new Hash(new byte[] {}), check));
+    this.firstBlock = new Node(new Block(0, new Transaction("", "", 0),
+                               new Hash(new byte[] {}), check));
     this.tailBlock = this.firstBlock;
-    this.check = check;
+    this.check = iCheck;
   } // BlockChain(HashValidator)
 
   // +---------+-----------------------------------------------------
   // | Helpers |
   // +---------+
 
+  /**
+   * Computes the hash for blocks given provided block information.
+   *
+   * @param blk block to be given hash
+   * @return a hash that fits the given block information
+   */
   public Hash computeHash(Block blk) {
     Hash resultHash = new Hash(new byte[] {1});
     try {
@@ -134,7 +141,7 @@ public class BlockChain implements Iterable<Transaction> {
       throw new IllegalArgumentException();
     } else if (!blk.getPrevHash().equals(tailBlock.getBlock().getHash())) {
       throw new IllegalArgumentException();
-    }
+    } // if/else
 
     blk.prevHash = this.tailBlock.getBlock().getHash();
     Node newNode = new Node(blk);
@@ -156,7 +163,7 @@ public class BlockChain implements Iterable<Transaction> {
     } else {
       Node prevNode = this.firstBlock;
       Node node = this.firstBlock.getNext();
-      while(node.hasNext()) {
+      while (node.hasNext()) {
         prevNode = node;
         node = node.getNext();
       } // while
@@ -191,11 +198,13 @@ public class BlockChain implements Iterable<Transaction> {
       Hash original = newNode.getBlock().getHash();
       newNode.getBlock().computeHash();
       Hash newHash = newNode.getBlock().getHash();
-      if (balance(newNode.getBlock().transaction.getSource()) < 0 && !newNode.getBlock().getTransaction().getSource().equals("")) {
+      if (balance(newNode.getBlock().transaction.getSource()) < 0
+          && !newNode.getBlock().getTransaction().getSource().equals("")) {
         return false;
       } else if (newNode.getBlock().getTransaction().getAmount() < 0) {
         return false;
-      }else if (newNode.hasNext() && !newNode.next.getBlock().getPrevHash().equals(newNode.getBlock().getHash())) {
+      } else if (newNode.hasNext() && !newNode.next.getBlock().getPrevHash()
+                 .equals(newNode.getBlock().getHash())) {
         return false;
       } else if (!this.check.isValid(newNode.getBlock().getHash())) {
         return false;
@@ -224,16 +233,19 @@ public class BlockChain implements Iterable<Transaction> {
       newNode.getBlock().computeHash();
       Hash newHash = newNode.getBlock().getHash();
 
-      if (balance(newNode.getBlock().transaction.getSource()) < 0 && !newNode.getBlock().transaction.getSource().equals("")) {
-        throw new Exception("Incorrect Amounts for User: " + newNode.getBlock().transaction.getSource());
+      if (balance(newNode.getBlock().transaction.getSource()) < 0
+          && !newNode.getBlock().transaction.getSource().equals("")) {
+        throw new Exception("Incorrect Amounts for User: "
+                            + newNode.getBlock().transaction.getSource());
       } else if (newNode.getBlock().getTransaction().getAmount() < 0) {
         throw new Exception("Negative Amount for Block: " + newNode.getBlock().getNum());
-      } else if (newNode.hasNext() && !newNode.next.getBlock().getPrevHash().equals(newNode.getBlock().getHash())) {
+      } else if (newNode.hasNext()
+                 && !newNode.next.getBlock().getPrevHash().equals(newNode.getBlock().getHash())) {
         throw new Exception("Incorrect Previous Hash for Block: " + newNode.getBlock().getNum());
       } else if (!this.check.isValid(newNode.getBlock().getHash())) {
         throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
       } else if (!original.equals(newHash)) {
-          throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
+        throw new Exception("Incorrect Hash for Block: " + newNode.getBlock().getNum());
       } // else/if
       newNode = newNode.next;
     } // while
@@ -246,40 +258,38 @@ public class BlockChain implements Iterable<Transaction> {
    * @return an iterator of all the people in the system.
    */
   public Iterator<String> users() {
-    String all[] = new String[BlockChain.this.size - 1];
+    String[] all = new String[BlockChain.this.size - 1];
     int userCount = all.length;
     Node nextNode = BlockChain.this.firstBlock.getNext();
     for (int i = 0; i < all.length; i++) {
       String trgt = nextNode.getBlock().getTransaction().getTarget();
       if (i == 0) {
         all[i] = trgt;
-      }
+      } // if
       boolean isin = false;
       for (int j = 0; j < i; j++) {
         if (all[j] != null) {
           if (all[j].equals(trgt)) {
             isin = true;
             userCount--;
-          }
-        }
-      }
-
+          } // if
+        } // if
+      } // for
       if (!isin) {
         all[i] = trgt;
       } else {
         all[i] = null;
-      }
-
+      } // if/else
       nextNode = nextNode.getNext();
-    }
-    String users[] = new String[userCount];
+    } // for
+    String[] users = new String[userCount];
     int index = 0;
     for (int i = 0; i < all.length; i++) {
       if (all[i] != null) {
         users[index] = all[i];
         index++;
-      }
-    }
+      } // if
+    } // for
     return new Iterator<String>() {
       int userIndex = 0;
       public boolean hasNext() {
@@ -315,7 +325,7 @@ public class BlockChain implements Iterable<Transaction> {
       currentNode = currentNode.getNext();
       if (balance < 0) {
         return balance;
-      }
+      } // if
     } // while
     return balance;
   } // balance()

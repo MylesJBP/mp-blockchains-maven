@@ -15,17 +15,23 @@ public class Block {
   // | Fields |
   // +--------+
 
-    int num;
+  /** The block number in the chain. */
+  int num;
 
-    Hash prevHash;
+  /** The hash of the previous block in the chain. */
+  Hash prevHash;
 
-    Hash currentHash;
+  /** The hash of the current block. */
+  Hash currentHash;
 
-    Transaction transaction;
+  /** The transaction stored in the block. */
+  Transaction transaction;
 
-    Long nonce;
+  /** The block nonce. */
+  Long nonce;
 
-    HashValidator check;
+  /** The validator for the block hash. */
+  HashValidator check;
   // +--------------+------------------------------------------------
   // | Constructors |
   // +--------------+
@@ -35,43 +41,43 @@ public class Block {
    * previous hash, mining to choose a nonce that meets the requirements
    * of the validator.
    *
-   * @param num
+   * @param iNum
    *   The number of the block.
-   * @param transaction
+   * @param iTransaction
    *   The transaction for the block.
-   * @param prevHash
+   * @param iPrevHash
    *   The hash of the previous block.
-   * @param check
+   * @param iCheck
    *   The validator used to check the block.
    */
-  public Block(int num, Transaction transaction, Hash prevHash,
-      HashValidator check) {
-      /*set the fields we can */
-      this.num = num;
-      this.prevHash = prevHash;
-      this.transaction = transaction;
-      this.check = check;
-      
-      this.computeHash();
+  public Block(int iNum, Transaction iTransaction, Hash iPrevHash,
+               HashValidator iCheck) {
+    /*set the fields we can */
+    this.num = iNum;
+    this.prevHash = iPrevHash;
+    this.transaction = iTransaction;
+    this.check = iCheck;
+
+    this.computeHash();
   } // Block(int, Transaction, Hash, HashValidator)
 
   /**
    * Create a new block, computing the hash for the block.
    *
-   * @param num
+   * @param iNum
    *   The number of the block.
-   * @param transaction
+   * @param iTransaction
    *   The transaction for the block.
-   * @param prevHash
+   * @param iPrevHash
    *   The hash of the previous block.
-   * @param nonce
+   * @param iNonce
    *   The nonce of the block.
    */
-  public Block(int num, Transaction transaction, Hash prevHash, long nonce) {
-    this.num = num;
-    this.transaction = transaction;
-    this.prevHash = prevHash;
-    this.nonce = nonce;
+  public Block(int iNum, Transaction iTransaction, Hash iPrevHash, long iNonce) {
+    this.num = iNum;
+    this.transaction = iTransaction;
+    this.prevHash = iPrevHash;
+    this.nonce = iNonce;
 
     this.computeHash();
   } // Block(int, Transaction, Hash, long)
@@ -86,47 +92,49 @@ public class Block {
    */
   public void computeHash() {
     try {
+      MessageDigest md = MessageDigest.getInstance("sha-256");
 
-    MessageDigest md = MessageDigest.getInstance("sha-256");
+      byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
+      byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES)
+                        .putInt(this.transaction.getAmount()).array();
+      byte[] sourcebytes = this.transaction.getSource().getBytes();
+      byte[] targetbytes = this.transaction.getTarget().getBytes();
+      byte[] prevbytes = this.prevHash.getBytes();
 
-    byte[] ibytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.num).array();
-    byte[] amtbytes = ByteBuffer.allocate(Integer.BYTES).putInt(this.transaction.getAmount()).array();
-    byte[] sourcebytes = this.transaction.getSource().getBytes();
-    byte[] targetbytes = this.transaction.getTarget().getBytes();
-    byte[] prevbytes = this.prevHash.getBytes();
+      if (nonce == null) {
+        for (long i = 0; i < Long.MAX_VALUE; i++) {
+          md.update(ibytes);
+          md.update(sourcebytes);
+          md.update(targetbytes);
+          md.update(amtbytes);
+          if (this.num != 0) {
+            md.update(prevbytes);
+          } // if
 
-    if (nonce == null) {
-      for (long i = 0; i < Long.MAX_VALUE; i++) {
+          byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(i).array();
+          md.update(lbytes);
+          currentHash = new Hash(md.digest());
+          if (check.isValid(currentHash)) {
+            this.nonce = i;
+            break;
+          } // if
+          md.reset();
+        } // for
+      } else {
+        byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
         md.update(ibytes);
         md.update(sourcebytes);
         md.update(targetbytes);
         md.update(amtbytes);
         if (this.num != 0) {
           md.update(prevbytes);
-        }
-
-        byte[] lbytes = ByteBuffer.allocate(Long.BYTES).putLong(i).array();
-        md.update(lbytes);
+        } // if
+        md.update(noncebytes);
         currentHash = new Hash(md.digest());
-        if (check.isValid(currentHash)) {
-          this.nonce = i;
-          break;
-        } 
-        md.reset();
-      }
-    } else {
-      byte[] noncebytes = ByteBuffer.allocate(Long.BYTES).putLong(this.nonce).array();
-      md.update(ibytes);
-      md.update(sourcebytes);
-      md.update(targetbytes);
-      md.update(amtbytes);
-      if (this.num != 0) {
-        md.update(prevbytes);
-      }
-      md.update(noncebytes);
-      currentHash = new Hash(md.digest());
-    } // else
-    } catch (NoSuchAlgorithmException e) {}
+      } // else
+    } catch (NoSuchAlgorithmException e) {
+      // catch exception
+    } // try/catch
   } // computeHash()
 
   // +---------+-----------------------------------------------------
@@ -148,7 +156,8 @@ public class Block {
    * @return the transaction.
    */
   public Transaction getTransaction() {
-    return new Transaction(transaction.getSource(), transaction.getTarget(), transaction.getAmount()); // STUB
+    return new Transaction(transaction.getSource(),
+                           transaction.getTarget(), transaction.getAmount());
   } // getTransaction()
 
   /**
@@ -184,6 +193,21 @@ public class Block {
    * @return a string representation of the block.
    */
   public String toString() {
-    return "";  // STUB
+    if (this.transaction.getSource().equals("")) {
+      return "Block " + this.num + "(Transaction: [Deposit, Target: "
+             + this.transaction.getTarget() + ", Amount: "
+             + this.transaction.getAmount() + "], Nonce: "
+             + this.nonce + ", prevHash: "
+             + this.prevHash + ", hash: "
+             + this.currentHash + ")";
+    } else {
+      return "Block " + this.num + "(Transaction: [Source: "
+             + this.transaction.getSource() + ", Target: "
+             + this.transaction.getTarget() + ", Amount: "
+             + this.transaction.getAmount() + "], Nonce: "
+             + this.nonce + ", prevHash: "
+             + this.prevHash + ", hash: "
+             + this.currentHash + ")";
+    } // if/else
   } // toString()
 } // class Block

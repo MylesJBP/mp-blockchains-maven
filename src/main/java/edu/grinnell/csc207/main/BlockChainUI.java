@@ -106,7 +106,8 @@ public class BlockChainUI {
           amount = IOUtils.readInt(pen, eyes, "Amount: ");
           nonce = IOUtils.readInt(pen, eyes, "Nonce: ");
 
-          chain.append(new Block(chain.getSize(), new Transaction(source, target, amount), chain.getHash(), nonce));
+          chain.append(new Block(chain.getSize(),
+                       new Transaction(source, target, amount), chain.getHash(), nonce));
           break;
 
         case "balance":
@@ -116,7 +117,7 @@ public class BlockChainUI {
 
         case "blocks":
           Iterator<Block> blockIter = chain.blocks();
-          while(blockIter.hasNext()) {
+          while (blockIter.hasNext()) {
             pen.println(blockIter.next().toString());
           } // while
           break;
@@ -155,14 +156,14 @@ public class BlockChainUI {
 
         case "transactions":
           Iterator<Transaction> transIter = chain.iterator();
-          while(transIter.hasNext()) {
+          while (transIter.hasNext()) {
             pen.println(transIter.next().toString());
           } // while
           break;
 
         case "users":
           Iterator<Block> userIter = chain.blocks();
-          while(userIter.hasNext()) {
+          while (userIter.hasNext()) {
             pen.println(userIter.next().getTransaction().getSource());
           } // while
           break;
