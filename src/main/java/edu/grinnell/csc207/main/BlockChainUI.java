@@ -100,12 +100,26 @@ public class BlockChainUI {
 
       switch (command.toLowerCase()) {
         case "append":
-          int nonce;
-          source = IOUtils.readLine(pen, eyes, "Source (return for deposit): ");
-          target = IOUtils.readLine(pen, eyes, "Target: ");
-          amount = IOUtils.readInt(pen, eyes, "Amount: ");
-          nonce = IOUtils.readInt(pen, eyes, "Nonce: ");
-
+          long nonce;
+          boolean finished = false;
+          source = "";
+          target = "";
+          amount = 0;
+          nonce = 0;
+          while (!finished) {
+            source = IOUtils.readLine(pen, eyes, "Source (return for deposit): ");
+            target = IOUtils.readLine(pen, eyes, "Target: ");
+            amount = IOUtils.readInt(pen, eyes, "Amount: ");
+            nonce = IOUtils.readLong(pen, eyes, "Nonce: ");
+            Block b = chain.mine(new Transaction(source, target, amount));
+            if (!source.equals("") && chain.balance(source) < amount) {
+              pen.println("Source does not have enough funds, please try again.");
+            } else if (nonce != b.getNonce()) {
+              pen.println("Incorrect nonce for information provided.");
+            } else {
+              finished = true;
+            } // if/else
+          } // while
           chain.append(new Block(chain.getSize(),
                        new Transaction(source, target, amount), chain.getHash(), nonce));
           break;
@@ -157,14 +171,14 @@ public class BlockChainUI {
         case "transactions":
           Iterator<Transaction> transIter = chain.iterator();
           while (transIter.hasNext()) {
-            pen.println(transIter.next().toString());
+            pen.println(transIter.next());
           } // while
           break;
 
         case "users":
-          Iterator<Block> userIter = chain.blocks();
+          Iterator<String> userIter = chain.users();
           while (userIter.hasNext()) {
-            pen.println(userIter.next().getTransaction().getSource());
+            pen.println(userIter.next());
           } // while
           break;
 

@@ -39,7 +39,7 @@ public class BlockChain implements Iterable<Transaction> {
   public BlockChain(HashValidator iCheck) {
     this.size = 1;
     this.firstBlock = new Node(new Block(0, new Transaction("", "", 0),
-                               new Hash(new byte[] {}), check));
+                               new Hash(new byte[] {}), iCheck));
     this.tailBlock = this.firstBlock;
     this.check = iCheck;
   } // BlockChain(HashValidator)
@@ -363,7 +363,7 @@ public class BlockChain implements Iterable<Transaction> {
       Node nextBlock = BlockChain.this.firstBlock;
 
       public boolean hasNext() {
-        return !(nextBlock.equals(BlockChain.this.tailBlock));
+        return (nextBlock != null);
       } // hasNext()
 
       public Transaction next() {

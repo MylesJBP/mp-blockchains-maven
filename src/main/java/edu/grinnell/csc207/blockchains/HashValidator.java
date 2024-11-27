@@ -17,4 +17,5 @@ public interface HashValidator {
    */
   boolean isValid(Hash hash);
 
+
 } // interface HashValidator
