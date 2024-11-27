@@ -68,7 +68,7 @@ public class BlockChainUI {
     BufferedReader eyes = new BufferedReader(new InputStreamReader(System.in));
 
     // Set up our blockchain.
-    HashValidator validator =
+    /* HashValidator validator =
         (h) -> {
           if (h.length() < VALIDATOR_BYTES) {
             return false;
@@ -80,7 +80,12 @@ public class BlockChainUI {
           } // for
           return true;
         };
-    BlockChain chain = new BlockChain(validator);
+        */
+    HashValidator standardValidator =
+        (hash) -> (hash.length() >= 3) && (hash.get(0) == 0)
+          && (hash.get(1) == 0) && (hash.get(2) == 0);
+
+    BlockChain chain = new BlockChain(standardValidator);
 
     instructions(pen);
 
